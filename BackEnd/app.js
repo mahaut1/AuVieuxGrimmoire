@@ -24,19 +24,19 @@ app.post('/api/book', (req, res, next) => {
 });
 
 app.get('/api/book/:id', (req, res, next) => {
-  Thing.findOne({ _id: req.params.id })
+  Book.findOne({ _id: req.params.id })
     .then(book => res.status(200).json(book))
     .catch(error => res.status(404).json({ error }));
 });
 
 app.put('/api/book/:id', (req, res, next) => {
-  Thing.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
+  Book.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
     .then(() => res.status(200).json({ message: 'Objet modifié !'}))
     .catch(error => res.status(400).json({ error }));
 });
 
 app.delete('/api/book/:id', (req, res, next) => {
-  Thing.deleteOne({ _id: req.params.id })
+  Book.deleteOne({ _id: req.params.id })
     .then(() => res.status(200).json({ message: 'Objet supprimé !'}))
     .catch(error => res.status(400).json({ error }));
 });
@@ -52,5 +52,4 @@ app.use('/api/books', (req, res, next) => {
   .then(books => res.status(200).json(books))
   .catch(error => res.status(400).json({ error }));
   });
-
-module.exports = app;
+  module.exports = app;
