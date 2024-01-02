@@ -9,23 +9,33 @@ exports.signup = (req, res, next) => {
           email: req.body.email,
           password: hash
         });
+        console.log(newUser)
         newUser.save()
           .then(() => res.status(201).json({ message: 'Utilisateur créé !' }))
           .catch(error => res.status(400).json({ error }));
       })
       .catch(error => res.status(500).json({ error }));
 };
+
 exports.login = (req, res, next) => {
+    console.log('Début de la fonction login');
+    console.log('Email reçu dans la requête:', req.body.email); 
+
     User.findOne({ email: req.body.email })
         .then(user => {
+            console.log('Résultat de la recherche de l\'utilisateur:', user);
             if (!user) {
+                console.log('Utilisateur non trouvé, envoi de la réponse 401');
                 return res.status(401).json({ error: 'Utilisateur non trouvé !' });
             }
             bcrypt.compare(req.body.password, user.password)
                 .then(valid => {
+                    console.log('Validation du mot de passe:', valid);
                     if (!valid) {
+                        console.log('Mot de passe incorrect, envoi de la réponse 401');
                         return res.status(401).json({ error: 'Mot de passe incorrect !' });
                     }
+                    console.log('Génération du token JWT');
                     res.status(200).json({
                         userId: user._id,
                         token: jwt.sign(
@@ -35,7 +45,14 @@ exports.login = (req, res, next) => {
                         )
                     });
                 })
-                .catch(error => res.status(500).json({ error }));
+                .catch(error => {
+                    console.log('Erreur lors de la comparaison des mots de passe:', error);
+                    res.status(500).json({ error });
+                });
         })
-        .catch(error => res.status(500).json({ error }));
+        .catch(error => {
+            console.log('Erreur lors de la recherche de l\'utilisateur:', error);
+            res.status(500).json({ error: 'Erreur lors de la recherche de l\'utilisateur.' });
+        });
  };
+

@@ -21,10 +21,6 @@ mongoose.connect('mongodb+srv://windalmahaut:qoFUyirNbEXYefZ8@cluster0.cczpfwg.m
     next();
   });
 
-
-
-
-
   app.use('/api/books', bookRoutes)
   app.use('/api/auth', userRoutes);
   module.exports = app;

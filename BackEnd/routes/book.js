@@ -6,7 +6,7 @@ const auth = require('../middleware/auth');
 
 router.post('/',auth, bookCtrl.createBook);
 
-router.get('/:id', auth, bookCtrl.getOneBook);
+router.get('/:id', bookCtrl.getOneBook);
 
 router.put('/:id', auth, bookCtrl.modifyBook);
 
