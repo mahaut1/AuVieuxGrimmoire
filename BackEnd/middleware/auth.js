@@ -11,8 +11,6 @@ module.exports = (req, res, next) => {
 
     const token = req.headers.authorization.split(' ')[1];
     console.log('Token extrait des en-têtes:', token);
-
-    // Vérifiez le token ici
     jwt.verify(token, 'RANDOM_TOKEN_SECRET', (err, decodedToken) => {
       if (err) {
         console.log('Token invalide:', err.message);

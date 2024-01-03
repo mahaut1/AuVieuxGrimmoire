@@ -11,11 +11,24 @@ exports.signup = (req, res, next) => {
         });
         console.log(newUser)
         newUser.save()
-          .then(() => res.status(201).json({ message: 'Utilisateur créé !' }))
+          .then(() => {
+            const token = jwt.sign(
+              { userId: newUser._id },
+              'RANDOM_TOKEN_SECRET',  
+              { expiresIn: '24h' }    
+            );
+  
+            res.status(201).json({
+              message: 'Utilisateur créé !',
+              token: token  
+            });
+            console.log(token)
+          })
+         
           .catch(error => res.status(400).json({ error }));
       })
       .catch(error => res.status(500).json({ error }));
-};
+  };
 
 exports.login = (req, res, next) => {
     console.log('Début de la fonction login');
