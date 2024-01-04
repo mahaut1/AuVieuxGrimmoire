@@ -4,31 +4,19 @@ const jwt = require('jsonwebtoken');
 
 
 exports.signup = (req, res, next) => {
-    bcrypt.hash(req.body.password, 10)
-      .then(hash => {
-        const newUser = new User({ 
-          email: req.body.email,
-          password: hash
-        });
-        console.log(newUser)
-        newUser.save()
-          .then(() => {
-            const token = jwt.sign(
-              { userId: newUser._id },
-              'RANDOM_TOKEN_SECRET',  
-              { expiresIn: '24h' }    
-            );
-            res.status(201).json({
-              message: 'Utilisateur créé !',
-              token: token  
-            });
-            console.log("token",token)
-          })
-         
-          .catch(error => res.status(400).json({ error }));
-      })
-      .catch(error => res.status(500).json({ error }));
-  };
+  bcrypt.hash(req.body.password, 10)
+    .then(hash => {
+      const user = new User({
+        email: req.body.email,
+        password: hash
+      });
+      console.log("user:", user)
+      user.save()
+        .then(() => res.status(201).json({ message: 'Utilisateur créé !' }))
+        .catch(error => res.status(400).json({ error }));
+    })
+    .catch(error => res.status(500).json({ error }));
+};
 
 exports.login = (req, res, next) => {
     console.log('Début de la fonction login');
