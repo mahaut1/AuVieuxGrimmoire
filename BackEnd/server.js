@@ -1,13 +1,6 @@
 const http = require('http');
 const app = require('./app');
-const express = require('express');
 
-
-app.use((req, res, next) => {
-  const token = req.headers.authorization;
-  res.setHeader('Authorization', token);
-  next();
-});
 
 const normalizePort = val => {
   const port = parseInt(val, 10);
