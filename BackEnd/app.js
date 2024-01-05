@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 const app = express();
 const bookRoutes = require('./routes/book');
 const userRoutes = require('./routes/user');
@@ -11,7 +12,13 @@ mongoose.connect('mongodb+srv://windalmahaut:qoFUyirNbEXYefZ8@cluster0.cczpfwg.m
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 
+  app.use(cors({
+    origin: 'http://localhost:3000', 
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    exposedHeaders: ['Authorization'],
+  }));
 
+  
   app.use(express.json());
   
   app.use((req, res, next) => {
