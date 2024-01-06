@@ -2,29 +2,21 @@ const Book = require('../models/Book')
 const fs= require('fs');
 const sharp=require('sharp')
 
-exports.createBook = async (req, res, next) => {
-  try {
-    const bookObject = JSON.parse(req.body.book);
+exports.createBook= (req, res, next) => {
+  const bookObject=JSON.parse(req.body.book)
     delete bookObject._id;
     delete bookObject.userId;
-    const optimizedImageBuffer = await sharp(req.file.buffer)
-      .resize({ width: 500 }) 
-      .jpeg({ quality: 70 }) 
-      .toBuffer(); 
-
+    
     const book = new Book({
       ...bookObject,
       userId: req.auth.userId,
-      // Utilisation de l'image optimisée pour l'URL
       imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     });
-
-    await book.save();
-    res.status(201).json({ message: 'Objet enregistré !' });
-  } catch (error) {
-    res.status(400).json({ error });
+    book.save()
+      .then(() => res.status(201).json({ message: 'Objet enregistré !'}))
+      .catch(error => res.status(400).json({ error }));
   }
-};
+
   exports.modifyBook = (req, res, next) => {
     const bookObject = req.file ? {
         ...JSON.parse(req.body.book),
