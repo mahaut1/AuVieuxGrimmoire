@@ -4,6 +4,7 @@ const cors = require('cors');
 const app = express();
 const bookRoutes = require('./routes/book');
 const userRoutes = require('./routes/user');
+const path=require('path');
 
 
 mongoose.connect('mongodb+srv://windalmahaut:qoFUyirNbEXYefZ8@cluster0.cczpfwg.mongodb.net/?retryWrites=true&w=majority',
@@ -28,6 +29,7 @@ mongoose.connect('mongodb+srv://windalmahaut:qoFUyirNbEXYefZ8@cluster0.cczpfwg.m
     next();
   });
 
+  app.use('/images', express.static(path.join(__dirname, 'images')));
   app.use('/api/books', bookRoutes)
   app.use('/api/auth', userRoutes);
   module.exports = app;
