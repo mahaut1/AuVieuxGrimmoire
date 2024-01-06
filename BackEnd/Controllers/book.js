@@ -1,20 +1,30 @@
 const Book = require('../models/Book')
 const fs= require('fs');
+const sharp=require('sharp')
 
-exports.createBook= (req, res, next) => {
-  const bookObject=JSON.parse(req.body.book)
+exports.createBook = async (req, res, next) => {
+  try {
+    const bookObject = JSON.parse(req.body.book);
     delete bookObject._id;
     delete bookObject.userId;
+    const optimizedImageBuffer = await sharp(req.file.buffer)
+      .resize({ width: 500 }) 
+      .jpeg({ quality: 70 }) 
+      .toBuffer(); 
+
     const book = new Book({
       ...bookObject,
       userId: req.auth.userId,
+      // Utilisation de l'image optimisée pour l'URL
       imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     });
-    book.save()
-      .then(() => res.status(201).json({ message: 'Objet enregistré !'}))
-      .catch(error => res.status(400).json({ error }));
-  }
 
+    await book.save();
+    res.status(201).json({ message: 'Objet enregistré !' });
+  } catch (error) {
+    res.status(400).json({ error });
+  }
+};
   exports.modifyBook = (req, res, next) => {
     const bookObject = req.file ? {
         ...JSON.parse(req.body.book),
@@ -67,14 +77,14 @@ exports.createBook= (req, res, next) => {
       .then(book => res.status(200).json(book))
       .catch(error => res.status(404).json({ error }));
   }
-
   exports.rateBook = async (req, res, next) => {
     console.log('Body:', req.body); 
     console.log('Params ID:', req.params.id);
     console.log('BookID:', req.params.id);
-    const { bookId, userId, rating } = req.body;
+    const { userId, rating } = req.body;
+  
     try {
-      const book = await Book.findById(bookId);
+      const book = await Book.findOne({ _id: req.params.id });
       console.log('Book:', book);
       console.log('Retrieved Book:', book);
       if (!book) {
@@ -85,6 +95,7 @@ exports.createBook= (req, res, next) => {
       if (userRating) {
         return res.status(400).json({ message: 'L\'utilisateur a déjà noté ce livre' });
       }
+  
       book.ratings.push({ userId, grade: rating });
       console.log('Updated Ratings:', book.ratings);
       const totalRatings = book.ratings.length;
@@ -94,6 +105,7 @@ exports.createBook= (req, res, next) => {
         totalRatingSum += r.grade;
         console.log('Total Ratings Sum:', totalRatingSum);
       });
+  
       const averageRating = totalRatingSum / totalRatings;
       console.log('New Average Rating:', averageRating);
       book.averageRating = averageRating;
@@ -104,4 +116,18 @@ exports.createBook= (req, res, next) => {
       res.status(500).json({ error: 'Erreur lors de la notation du livre' });
     }
   };
+
+  
+exports.getTopRatedBooks = async (req, res, next) => {
+  try {
+    const topRatedBooks = await Book.aggregate([
+      { $sort: { averageRating: -1 } }, // Trie par note moyenne décroissante
+      { $limit: 3 } // Limite les résultats à 3 livres
+    ]);
+    res.status(200).json(topRatedBooks);
+  } catch (error) {
+    res.status(500).json({ error: 'Une erreur est survenue lors de la récupération des meilleurs livres.' });
+  }
+};
+  
 
