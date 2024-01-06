@@ -67,3 +67,41 @@ exports.createBook= (req, res, next) => {
       .then(book => res.status(200).json(book))
       .catch(error => res.status(404).json({ error }));
   }
+
+  exports.rateBook = async (req, res, next) => {
+    console.log('Body:', req.body); 
+    console.log('Params ID:', req.params.id);
+    console.log('BookID:', req.params.id);
+    const { bookId, userId, rating } = req.body;
+    try {
+      const book = await Book.findById(bookId);
+      console.log('Book:', book);
+      console.log('Retrieved Book:', book);
+      if (!book) {
+        return res.status(404).json({ message: 'Livre non trouvé' });
+      }
+  
+      const userRating = book.ratings.find((r) => r.userId === userId);
+      if (userRating) {
+        return res.status(400).json({ message: 'L\'utilisateur a déjà noté ce livre' });
+      }
+      book.ratings.push({ userId, grade: rating });
+      console.log('Updated Ratings:', book.ratings);
+      const totalRatings = book.ratings.length;
+      let totalRatingSum = 0;
+  
+      book.ratings.forEach((r) => {
+        totalRatingSum += r.grade;
+        console.log('Total Ratings Sum:', totalRatingSum);
+      });
+      const averageRating = totalRatingSum / totalRatings;
+      console.log('New Average Rating:', averageRating);
+      book.averageRating = averageRating;
+      await book.save();
+      console.log('Updated Book:', book);
+      res.status(200).json({ message: 'Notation enregistrée avec succès', book });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur lors de la notation du livre' });
+    }
+  };
+
